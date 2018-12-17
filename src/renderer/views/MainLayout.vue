@@ -22,6 +22,12 @@
     <el-container>
       <el-header style="text-align: right; font-size: 12px">
         <el-button
+          type="primary"
+          circle
+          @click="eggModelClick"
+        >egg-model
+          <i class="el-icon-upload el-icon--download"></i></el-button>
+        <el-button
           type="danger"
           icon="el-icon-setting"
           circle
@@ -146,6 +152,7 @@
 
 <script>
 import SqlHelper from '@/utils/sql-helper.js'
+import EggModelTemplate from '@/utils/egg-model-template.js'
 
 export default {
   data: () => ({
@@ -168,7 +175,9 @@ export default {
     }],
     tableData: undefined,
     sqlHelper: undefined,
-    columnData: undefined
+    columnData: undefined,
+    tableElement: undefined,
+    htmlTxt: undefined
   }),
   created () {
     // 数据库链接
@@ -181,6 +190,7 @@ export default {
         const db = window.localStorage.getItem('dbConn')
         if (db) {
           this.dbConn = JSON.parse(db)
+          this.submitClick()
         } else {
           this.dialogFormVisible = true
         }
@@ -203,11 +213,32 @@ export default {
       this.dialogFormVisible = !this.dialogFormVisible
     },
     menuColumn (elitem) {
+      this.tableElement = elitem
       this.sqlHelper.query(this.sqlHelper.findColumnSql(elitem.table_name), (rows) => {
         this.columnData = rows
       }, (errFunc) => {
         console.log(errFunc)
       })
+    },
+    eggModelClick () {
+      if (!this.tableElement) {
+        return this.$message.error('请先点选表格！')
+      }
+      this.htmlTxt = new EggModelTemplate(this.tableElement, this.columnData).findModelTxt()
+      this.$prompt('model内容', '提示', {
+        confirmButtonText: '确定',
+        inputType: 'textarea',
+        inputValue: this.htmlTxt
+      })
+      // this.$alert(this.htmlTxt, 'egg-model', {
+      //   confirmButtonText: '确定',
+      //   callback: action => {
+      //     this.$message({
+      //       type: 'info',
+      //       message: `action: ${action}`
+      //     })
+      //   }
+      // })
     }
   }
 }
