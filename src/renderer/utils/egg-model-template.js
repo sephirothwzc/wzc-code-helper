@@ -11,14 +11,23 @@ class EggModelTemplate {
     switch (element.DATA_TYPE) {
       case 'nvarchar':
       case 'varchar':
-        return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`
+        if (element.CHARACTER_MAXIMUM_LENGTH) {
+          return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`
+        }
+        return 'STRING'
       case 'datetime':
         return `DATE`
       case 'timestamp':
       case 'int':
         return `INTEGER`
       case 'decimal':
-        return `DOUBLE`
+        return `DECIMAL`
+      case 'boolean':
+        return 'BOOLEAN'
+      case 'bigint':
+        return 'BIGINT'
+      case 'double':
+        return 'DOUBLE'
     }
   }
 
@@ -32,8 +41,7 @@ class EggModelTemplate {
           x.COLUMN_NAME !== 'update_date'
       )
       .forEach(element => {
-        col += `
-        // ${element.COLUMN_COMMENT}
+        col += `// ${element.COLUMN_COMMENT}
         ${inflect.camelize(
     element.COLUMN_NAME,
     false
@@ -46,7 +54,7 @@ class EggModelTemplate {
 const snowflake = require('node-snowflake').Snowflake;
 
 module.exports = app => {
-  const { STRING, INTEGER, DATE, DOUBLE } = app.Sequelize;
+  const { STRING, INTEGER, DATE, DOUBLE, DECIMAL, BIGINT, BOOLEAN } = app.Sequelize;
 
   const ${inflect.camelize(this.elitem.table_name)}Do = app.model.define(
     '${this.elitem.table_name}',

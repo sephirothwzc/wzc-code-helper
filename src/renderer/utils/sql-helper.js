@@ -10,12 +10,12 @@ class SqlHelper {
   findTablesSql () {
     switch (this.connString.dbType) {
       case 'mysql': {
-        return `select table_name,table_comment from information_schema.tables where table_schema='${
+        return `select table_name AS TABLE_NAME,table_comment AS TABLE_COMMENT from information_schema.tables where table_schema='${
           this.connString.database
         }'`
       }
       case 'mssql': {
-        return "SELECT DISTINCT d.name as table_name,f.value as table_comment FROM syscolumns a LEFT JOIN systypes b ON a.xusertype= b.xusertype INNER JOIN sysobjects d ON a.id= d.id AND d.xtype= 'U' AND d.name<> 'dtproperties' LEFT JOIN syscomments e ON a.cdefault= e.id LEFT JOIN sys.extended_properties g ON a.id= G.major_id AND a.colid= g.minor_id LEFT JOIN sys.extended_properties f ON d.id= f.major_id AND f.minor_id= 0 order by d.name"
+        return "SELECT DISTINCT d.name as TABLE_NAME,f.value as TABLE_COMMENT FROM syscolumns a LEFT JOIN systypes b ON a.xusertype= b.xusertype INNER JOIN sysobjects d ON a.id= d.id AND d.xtype= 'U' AND d.name<> 'dtproperties' LEFT JOIN syscomments e ON a.cdefault= e.id LEFT JOIN sys.extended_properties g ON a.id= G.major_id AND a.colid= g.minor_id LEFT JOIN sys.extended_properties f ON d.id= f.major_id AND f.minor_id= 0 order by d.name"
       }
     }
   }
