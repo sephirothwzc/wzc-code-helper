@@ -34,6 +34,12 @@
           @click="settingClick"
         ></el-button>
         <span>{{dbConn.dbType}}</span>
+        <el-button
+          type="danger"
+          icon="el-icon-delete"
+          circle
+          @click="deleteClick"
+        ></el-button>
       </el-header>
 
       <el-main>
@@ -134,6 +140,24 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
+        <el-form-item
+          label="createdAt"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="dbConn.createdAt"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="updatedAt"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="dbConn.updatedAt"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
       </el-form>
       <div
         slot="footer"
@@ -164,7 +188,9 @@ export default {
       port: undefined,
       user: undefined,
       password: undefined,
-      database: undefined
+      database: undefined,
+      createdAt: 'create_date',
+      updatedAt: 'update_date'
     },
     options: [{
       value: 'mysql',
@@ -224,21 +250,15 @@ export default {
       if (!this.tableElement) {
         return this.$message.error('请先点选表格！')
       }
-      this.htmlTxt = new EggModelTemplate(this.tableElement, this.columnData).findModelTxt()
+      this.htmlTxt = new EggModelTemplate(this.tableElement, this.columnData, this.dbConn).findModelTxt()
       this.$prompt('model内容', '提示', {
         confirmButtonText: '确定',
         inputType: 'textarea',
         inputValue: this.htmlTxt
       })
-      // this.$alert(this.htmlTxt, 'egg-model', {
-      //   confirmButtonText: '确定',
-      //   callback: action => {
-      //     this.$message({
-      //       type: 'info',
-      //       message: `action: ${action}`
-      //     })
-      //   }
-      // })
+    },
+    deleteClick () {
+      window.localStorage.removeItem('dbConn')
     }
   }
 }

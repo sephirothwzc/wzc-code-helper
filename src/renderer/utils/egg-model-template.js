@@ -1,13 +1,15 @@
 const inflect = require('i')()
 
 class EggModelTemplate {
-  constructor (elitem, columns) {
+  constructor (elitem, columns, conn) {
     this.elitem = elitem
     this.columns = columns
+    this.conn = conn
   }
 
   findTypeTxt (element) {
     switch (element.DATA_TYPE) {
+      case 'nvarchar':
       case 'varchar':
         return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`
       case 'datetime':
@@ -30,12 +32,14 @@ class EggModelTemplate {
           x.COLUMN_NAME !== 'update_date'
       )
       .forEach(element => {
-        col += `${inflect.camelize(
-          element.COLUMN_NAME,
-          false
-        )}: { type: ${this.findTypeTxt(element)}, field: '${
-          element.COLUMN_NAME
-        }' },
+        col += `
+        // ${element.COLUMN_COMMENT}
+        ${inflect.camelize(
+    element.COLUMN_NAME,
+    false
+  )}: { type: ${this.findTypeTxt(element)}, field: '${
+  element.COLUMN_NAME
+}' },
         `
       })
     return `'use strict';
@@ -58,8 +62,8 @@ module.exports = app => {
       timestamps: false,
       freezeTableName: true,
       underscored: false,
-      createdAt: 'create_date',
-      updatedAt: 'update_date',
+      createdAt: '${this.conn.createdAt}',
+      updatedAt: '${this.conn.updatedAt}',
     }
   );
 
