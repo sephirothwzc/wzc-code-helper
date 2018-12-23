@@ -52,7 +52,7 @@ class EggModelTemplate {
       if (colName.length === proName.length) {
         return ` '${proName}'`
       } else {
-        return ` [ '${proName}', '${colName}' ]`
+        return ` [ '${colName}', '${proName}' ]`
       }
     }).value().forEach(p => {
       attr += p

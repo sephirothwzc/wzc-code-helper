@@ -1,47 +1,45 @@
 <template>
   <el-container style="height:auto; border: 1px solid #eee">
-    <div>
-      <el-aside width="auto" style="background-color: rgb(238, 241, 246)">
-        <el-menu :default-openeds="['1', '3']">
-          <el-submenu index="1">
-            <template slot="title">
-              <i class="el-icon-message"></i>
-              {{dbConn.database}}
-            </template>
-            <el-menu-item-group>
-              <template slot="title">表</template>
-              <el-menu-item
-                v-for="(elitem,index) in tableData"
-                :key="elitem.TABLE_NAME"
-                :index="`1-${index}`"
-                @click="menuColumn(elitem)"
-              >{{elitem.TABLE_NAME}}-{{elitem.TABLE_COMMENT}}</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-        </el-menu>
-      </el-aside>
-      <el-container>
-        <el-header style="text-align: right; font-size: 12px">
-          <el-button type="primary" circle @click="eggModelClick">
-            egg-model
-            <i class="el-icon-upload el-icon--download"></i>
-          </el-button>
-          <el-button type="danger" icon="el-icon-setting" circle @click="settingClick"></el-button>
-          <span>{{dbConn.dbType}}</span>
-          <el-button type="danger" icon="el-icon-delete" circle @click="deleteClick"></el-button>
-        </el-header>
+    <el-aside width="auto" style="background-color: rgb(238, 241, 246)">
+      <el-menu :default-openeds="['1', '3']">
+        <el-submenu index="1">
+          <template slot="title">
+            <i class="el-icon-message"></i>
+            {{dbConn.database}}
+          </template>
+          <el-menu-item-group>
+            <template slot="title">表</template>
+            <el-menu-item
+              v-for="(elitem,index) in tableData"
+              :key="elitem.TABLE_NAME"
+              :index="`1-${index}`"
+              @click="menuColumn(elitem)"
+            >{{elitem.TABLE_NAME}}-{{elitem.TABLE_COMMENT}}</el-menu-item>
+          </el-menu-item-group>
+        </el-submenu>
+      </el-menu>
+    </el-aside>
+    <el-container>
+      <el-header style="text-align: right; font-size: 12px">
+        <el-button type="primary" circle @click="eggModelClick">
+          egg-model
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
+        <el-button type="danger" icon="el-icon-setting" circle @click="settingClick"></el-button>
+        <span>{{dbConn.dbType}}</span>
+        <el-button type="danger" icon="el-icon-delete" circle @click="deleteClick"></el-button>
+      </el-header>
 
-        <el-main>
-          <el-table :data="columnData">
-            <el-table-column prop="COLUMN_NAME" label="字段名"></el-table-column>
-            <el-table-column prop="COLUMN_COMMENT" label="说明"></el-table-column>
-            <el-table-column prop="IS_NULLABLE" label="必填"></el-table-column>
-            <el-table-column prop="DATA_TYPE" label="数据类型"></el-table-column>
-            <el-table-column prop="CHARACTER_MAXIMUM_LENGTH" label="长度"></el-table-column>
-          </el-table>
-        </el-main>
-      </el-container>
-    </div>
+      <el-main>
+        <el-table :data="columnData">
+          <el-table-column prop="COLUMN_NAME" label="字段名"></el-table-column>
+          <el-table-column prop="COLUMN_COMMENT" label="说明"></el-table-column>
+          <el-table-column prop="IS_NULLABLE" label="必填"></el-table-column>
+          <el-table-column prop="DATA_TYPE" label="数据类型"></el-table-column>
+          <el-table-column prop="CHARACTER_MAXIMUM_LENGTH" label="长度"></el-table-column>
+        </el-table>
+      </el-main>
+    </el-container>
     <!-- 弹出数据选择 -->
     <el-dialog title="数据库设置" :visible.sync="dialogFormVisible">
       <el-form :model="dbConn">
