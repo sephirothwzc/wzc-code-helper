@@ -1,4 +1,5 @@
 const inflect = require('i')()
+const _ = require('lodash')
 
 class EggModelTemplate {
   constructor (elitem, columns, conn) {
@@ -30,6 +31,36 @@ class EggModelTemplate {
         return 'DOUBLE'
     }
   }
+  /**
+   * 设置attributes
+   *
+   * @returns
+   * @memberof EggModelTemplate
+   */
+  privateFindModelAttributes () {
+    let attr = '['
+    _(this.columns).filter(
+      x =>
+        x.COLUMN_NAME !== 'create_date' &&
+        x.COLUMN_NAME !== 'update_date' &&
+        x.COLUMN_NAME !== 'create_by' &&
+        x.COLUMN_NAME !== 'update_by' &&
+        x.COLUMN_NAME !== 'enable_flag'
+    ).map(p => {
+      const colName = p.COLUMN_NAME
+      const proName = inflect.camelize(p.COLUMN_NAME, false)
+      if (colName.length === proName.length) {
+        return ` '${proName}'`
+      } else {
+        return ` [ '${proName}', '${colName}' ]`
+      }
+    }).value().forEach(p => {
+      attr += p
+      attr += ','
+    })
+    attr += ']'
+    return attr
+  }
 
   findModelTxt () {
     let col = ''
@@ -50,14 +81,17 @@ class EggModelTemplate {
 }' },
         `
       })
+    const attr = this.privateFindModelAttributes()
+    // return '123' + col + attr
+
     return `'use strict';
 const snowflake = require('node-snowflake').Snowflake;
 
 module.exports = app => {
   const { STRING, INTEGER, DATE, DOUBLE, DECIMAL, BIGINT, BOOLEAN } = app.Sequelize;
 
-  const ${inflect.camelize(this.elitem.table_name)}Do = app.model.define(
-    '${this.elitem.table_name}',
+  const ${inflect.camelize(this.elitem.TABLE_NAME)}Do = app.model.define(
+    '${this.elitem.TABLE_NAME}',
     {
       id: {
         type: STRING(36),
@@ -75,7 +109,9 @@ module.exports = app => {
     }
   );
 
-  return ${inflect.camelize(this.elitem.table_name)}Do;
+  ${inflect.camelize(this.elitem.TABLE_NAME)}Do.attributes = ${attr};
+
+  return ${inflect.camelize(this.elitem.TABLE_NAME)}Do;
 };
 `
   }
