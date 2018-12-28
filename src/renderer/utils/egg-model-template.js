@@ -41,19 +41,18 @@ class EggModelTemplate {
     let attr = '['
     _(this.columns).filter(
       x =>
-        x.COLUMN_NAME !== 'create_date' &&
-        x.COLUMN_NAME !== 'update_date' &&
-        x.COLUMN_NAME !== 'create_by' &&
-        x.COLUMN_NAME !== 'update_by' &&
-        x.COLUMN_NAME !== 'enable_flag'
+        x.COLUMN_NAME !== 'created_at' &&
+        x.COLUMN_NAME !== 'updated_at' &&
+        x.COLUMN_NAME !== 'deleted_at'
     ).map(p => {
-      const colName = p.COLUMN_NAME
-      const proName = inflect.camelize(p.COLUMN_NAME, false)
-      if (colName.length === proName.length) {
-        return ` '${proName}'`
-      } else {
-        return ` [ '${colName}', '${proName}' ]`
-      }
+      return ` '${p.COLUMN_NAME}'`
+      // const colName = p.COLUMN_NAME
+      // const proName = inflect.camelize(p.COLUMN_NAME, false)
+      // if (colName.length === proName.length) {
+      //   return ` '${proName}'`
+      // } else {
+      //   return ` [ '${colName}', '${proName}' ]`
+      // }
     }).value().forEach(p => {
       attr += p
       attr += ','
@@ -67,19 +66,25 @@ class EggModelTemplate {
     this.columns
       .filter(
         x =>
-          x.COLUMN_NAME !== 'id' &&
-          x.COLUMN_NAME !== 'create_date' &&
-          x.COLUMN_NAME !== 'update_date'
+          x.COLUMN_NAME !== 'id'
       )
       .forEach(element => {
         col += `// ${element.COLUMN_COMMENT}
         ${inflect.camelize(
     element.COLUMN_NAME,
     false
-  )}: { type: ${this.findTypeTxt(element)}, field: '${
-  element.COLUMN_NAME
-}' },
+  )}: ${this.findTypeTxt(element)},
         `
+        // #region
+//         col += `// ${element.COLUMN_COMMENT}
+//         ${inflect.camelize(
+//     element.COLUMN_NAME,
+//     false
+//   )}: { type: ${this.findTypeTxt(element)}, field: '${
+//   element.COLUMN_NAME
+// }' },
+//         `
+        // #endregion
       })
     const attr = this.privateFindModelAttributes()
     // return '123' + col + attr
@@ -94,7 +99,7 @@ module.exports = app => {
     '${this.elitem.TABLE_NAME}',
     {
       id: {
-        type: STRING(36),
+        type: BIGINT,
         primaryKey: true,
         defaultValue: snowflake.nextId(),
       },
@@ -103,9 +108,12 @@ module.exports = app => {
     {
       timestamps: false,
       freezeTableName: true,
-      underscored: false,
-      createdAt: '${this.conn.createdAt}',
-      updatedAt: '${this.conn.updatedAt}',
+      underscored: true,
+      underscoredAll: true,
+      paranoid: true
+      // createdAt: '${this.conn.createdAt}',
+      // updatedAt: '${this.conn.updatedAt}',
+      // deletedAt:
     }
   );
 

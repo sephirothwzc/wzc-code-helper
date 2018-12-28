@@ -164,6 +164,10 @@ export default {
         confirmButtonText: '确定',
         inputType: 'textarea',
         inputValue: this.htmlTxt
+      }).then((result) => {
+        console.log(result)
+      }).catch((err) => {
+        console.log(err)
       })
     },
     deleteClick () {
