@@ -94,7 +94,7 @@ module.exports = app => {
       id: {
         type: BIGINT,
         primaryKey: true,
-        defaultValue: snowflake.nextId(),
+        defaultValue: () => snowflake.nextId(),
       },
       ${col}
     },
