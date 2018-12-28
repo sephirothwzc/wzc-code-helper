@@ -45,14 +45,13 @@ class EggModelTemplate {
         x.COLUMN_NAME !== 'updated_at' &&
         x.COLUMN_NAME !== 'deleted_at'
     ).map(p => {
-      return ` '${p.COLUMN_NAME}'`
-      // const colName = p.COLUMN_NAME
-      // const proName = inflect.camelize(p.COLUMN_NAME, false)
-      // if (colName.length === proName.length) {
-      //   return ` '${proName}'`
-      // } else {
-      //   return ` [ '${colName}', '${proName}' ]`
-      // }
+      const colName = p.COLUMN_NAME
+      const proName = inflect.camelize(p.COLUMN_NAME, false)
+      if (colName.length === proName.length) {
+        return ` '${proName}'`
+      } else {
+        return ` [ '${colName}', '${proName}' ]`
+      }
     }).value().forEach(p => {
       attr += p
       attr += ','
@@ -69,21 +68,15 @@ class EggModelTemplate {
           x.COLUMN_NAME !== 'id'
       )
       .forEach(element => {
+        // #region
         col += `// ${element.COLUMN_COMMENT}
         ${inflect.camelize(
     element.COLUMN_NAME,
     false
-  )}: ${this.findTypeTxt(element)},
+  )}: { type: ${this.findTypeTxt(element)}, field: '${
+  element.COLUMN_NAME
+}' },
         `
-        // #region
-//         col += `// ${element.COLUMN_COMMENT}
-//         ${inflect.camelize(
-//     element.COLUMN_NAME,
-//     false
-//   )}: { type: ${this.findTypeTxt(element)}, field: '${
-//   element.COLUMN_NAME
-// }' },
-//         `
         // #endregion
       })
     const attr = this.privateFindModelAttributes()
