@@ -106,7 +106,7 @@ module.exports = app => {
       paranoid: true
       // createdAt: '${this.conn.createdAt}',
       // updatedAt: '${this.conn.updatedAt}',
-      // deletedAt:
+      // deletedAt: 'deleted_at',
     }
   );
 
