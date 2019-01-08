@@ -2,17 +2,17 @@ const inflect = require('i')();
 const _ = require('lodash');
 
 class EggModelTemplate {
-  constructor(elitem, columns, conn) {
+  constructor (elitem, columns, conn) {
     this.elitem = elitem;
     this.columns = columns;
     this.conn = conn;
   }
 
-  findTypeTxt(element) {
+  findTypeTxt (element, getLength = true) {
     switch (element.DATA_TYPE) {
       case 'nvarchar':
       case 'varchar':
-        if (element.CHARACTER_MAXIMUM_LENGTH) {
+        if (element.CHARACTER_MAXIMUM_LENGTH && getLength) {
           return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`;
         }
         return 'STRING';
@@ -37,7 +37,7 @@ class EggModelTemplate {
    * @returns
    * @memberof EggModelTemplate
    */
-  privateFindModelAttributes() {
+  privateFindModelAttributes () {
     let attr = '[';
     _(this.columns)
       .filter(
@@ -64,19 +64,22 @@ class EggModelTemplate {
     return attr;
   }
 
-  findModelTxt() {
+  findModelTxt () {
     let col = '';
+    const typeGroup = ['BIGINT'];
     this.columns
       .filter(x => x.COLUMN_NAME !== 'id')
       .forEach(element => {
+        const typetest = this.findTypeTxt(element, false);
+        !typeGroup.includes(typetest) && typeGroup.push(typetest);
         // #region
         col += `// ${element.COLUMN_COMMENT}
         ${inflect.camelize(
-          element.COLUMN_NAME,
-          false
-        )}: { type: ${this.findTypeTxt(element)}, field: '${
-          element.COLUMN_NAME
-        }' },
+    element.COLUMN_NAME,
+    false
+  )}: { type: ${this.findTypeTxt(element)}, field: '${
+  element.COLUMN_NAME
+}' },
         `;
         // #endregion
       });
@@ -84,14 +87,14 @@ class EggModelTemplate {
     // return '123' + col + attr
 
     return `'use strict';
-const snowflake = require('snowflake-nodejs').Snowflake;
+const snowflake = require('snowflake-nodejs');
 snowflake.init();
 
 module.exports = app => {
-  const { STRING, INTEGER, DATE, DOUBLE, DECIMAL, BIGINT, BOOLEAN } = app.Sequelize;
+  const { ${typeGroup.toString()} } = app.Sequelize;
 
   const ${inflect.camelize(this.elitem.TABLE_NAME)}Do = app.model.define(
-    '${this.elitem.TABLE_NAME}',
+    '${inflect.camelize(this.elitem.TABLE_NAME, false)}',
     {
       id: {
         type: BIGINT,
@@ -103,9 +106,10 @@ module.exports = app => {
     {
       timestamps: true,
       freezeTableName: true,
+      tableName: '${this.elitem.TABLE_NAME}',
       underscored: true,
       underscoredAll: true,
-      ${this.conn.deletedAt ? '' : '//'} paranoid: true
+      paranoid: true
       ${this.conn.createdAt ? '' : '//'} createdAt: '${this.conn.createdAt}',
       ${this.conn.updatedAt ? '' : '//'} updatedAt: '${this.conn.updatedAt}',
       ${this.conn.deletedAt ? '' : '//'} deletedAt: '${this.conn.deletedAt}',

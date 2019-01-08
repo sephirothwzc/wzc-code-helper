@@ -5,11 +5,11 @@
 </template>
 
 <script>
-  export default {
-    name: 'wzc-code-helper'
-  }
+export default {
+  name: 'wzc-code-helper'
+}
 </script>
 
 <style>
-  /* CSS */
+/* CSS */
 </style>
