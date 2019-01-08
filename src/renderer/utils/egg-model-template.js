@@ -1,34 +1,34 @@
-const inflect = require('i')()
-const _ = require('lodash')
+const inflect = require('i')();
+const _ = require('lodash');
 
 class EggModelTemplate {
-  constructor (elitem, columns, conn) {
-    this.elitem = elitem
-    this.columns = columns
-    this.conn = conn
+  constructor(elitem, columns, conn) {
+    this.elitem = elitem;
+    this.columns = columns;
+    this.conn = conn;
   }
 
-  findTypeTxt (element) {
+  findTypeTxt(element) {
     switch (element.DATA_TYPE) {
       case 'nvarchar':
       case 'varchar':
         if (element.CHARACTER_MAXIMUM_LENGTH) {
-          return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`
+          return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`;
         }
-        return 'STRING'
+        return 'STRING';
       case 'datetime':
-        return `DATE`
+        return `DATE`;
       case 'timestamp':
       case 'int':
-        return `INTEGER`
+        return `INTEGER`;
       case 'decimal':
-        return `DECIMAL`
+        return `DECIMAL`;
       case 'boolean':
-        return 'BOOLEAN'
+        return 'BOOLEAN';
       case 'bigint':
-        return 'BIGINT'
+        return 'BIGINT';
       case 'double':
-        return 'DOUBLE'
+        return 'DOUBLE';
     }
   }
   /**
@@ -37,53 +37,55 @@ class EggModelTemplate {
    * @returns
    * @memberof EggModelTemplate
    */
-  privateFindModelAttributes () {
-    let attr = '['
-    _(this.columns).filter(
-      x =>
-        x.COLUMN_NAME !== 'created_at' &&
-        x.COLUMN_NAME !== 'updated_at' &&
-        x.COLUMN_NAME !== 'deleted_at'
-    ).map(p => {
-      const colName = p.COLUMN_NAME
-      const proName = inflect.camelize(p.COLUMN_NAME, false)
-      if (colName.length === proName.length) {
-        return ` '${proName}'`
-      } else {
-        return ` [ '${colName}', '${proName}' ]`
-      }
-    }).value().forEach(p => {
-      attr += p
-      attr += ','
-    })
-    attr += ']'
-    return attr
-  }
-
-  findModelTxt () {
-    let col = ''
-    this.columns
+  privateFindModelAttributes() {
+    let attr = '[';
+    _(this.columns)
       .filter(
         x =>
-          x.COLUMN_NAME !== 'id'
+          x.COLUMN_NAME !== 'created_at' &&
+          x.COLUMN_NAME !== 'updated_at' &&
+          x.COLUMN_NAME !== 'deleted_at'
       )
+      .map(p => {
+        const colName = p.COLUMN_NAME;
+        const proName = inflect.camelize(p.COLUMN_NAME, false);
+        if (colName.length === proName.length) {
+          return ` '${proName}'`;
+        } else {
+          return ` [ '${colName}', '${proName}' ]`;
+        }
+      })
+      .value()
+      .forEach(p => {
+        attr += p;
+        attr += ',';
+      });
+    attr += ']';
+    return attr;
+  }
+
+  findModelTxt() {
+    let col = '';
+    this.columns
+      .filter(x => x.COLUMN_NAME !== 'id')
       .forEach(element => {
         // #region
         col += `// ${element.COLUMN_COMMENT}
         ${inflect.camelize(
-    element.COLUMN_NAME,
-    false
-  )}: { type: ${this.findTypeTxt(element)}, field: '${
-  element.COLUMN_NAME
-}' },
-        `
+          element.COLUMN_NAME,
+          false
+        )}: { type: ${this.findTypeTxt(element)}, field: '${
+          element.COLUMN_NAME
+        }' },
+        `;
         // #endregion
-      })
-    const attr = this.privateFindModelAttributes()
+      });
+    const attr = this.privateFindModelAttributes();
     // return '123' + col + attr
 
     return `'use strict';
-const snowflake = require('node-snowflake').Snowflake;
+const snowflake = require('snowflake-nodejs').Snowflake;
+snowflake.init();
 
 module.exports = app => {
   const { STRING, INTEGER, DATE, DOUBLE, DECIMAL, BIGINT, BOOLEAN } = app.Sequelize;
@@ -94,19 +96,19 @@ module.exports = app => {
       id: {
         type: BIGINT,
         primaryKey: true,
-        defaultValue: () => snowflake.nextId(),
+        defaultValue: () => snowflake.nextId(1, 2),
       },
       ${col}
     },
     {
-      timestamps: false,
+      timestamps: true,
       freezeTableName: true,
       underscored: true,
       underscoredAll: true,
-      paranoid: true
-      // createdAt: '${this.conn.createdAt}',
-      // updatedAt: '${this.conn.updatedAt}',
-      // deletedAt: 'deleted_at',
+      ${this.conn.deletedAt ? '' : '//'} paranoid: true
+      ${this.conn.createdAt ? '' : '//'} createdAt: '${this.conn.createdAt}',
+      ${this.conn.updatedAt ? '' : '//'} updatedAt: '${this.conn.updatedAt}',
+      ${this.conn.deletedAt ? '' : '//'} deletedAt: '${this.conn.deletedAt}',
     }
   );
 
@@ -114,8 +116,8 @@ module.exports = app => {
 
   return ${inflect.camelize(this.elitem.TABLE_NAME)}Do;
 };
-`
+`;
   }
 }
 
-export default EggModelTemplate
+export default EggModelTemplate;

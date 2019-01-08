@@ -74,6 +74,9 @@
         <el-form-item label="updatedAt" :label-width="formLabelWidth">
           <el-input v-model="dbConn.updatedAt" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="deletedAt" :label-width="formLabelWidth">
+          <el-input v-model="dbConn.deletedAt" autocomplete="off"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -98,8 +101,9 @@ export default {
       user: undefined,
       password: undefined,
       database: undefined,
-      createdAt: 'create_date',
-      updatedAt: 'update_date'
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at'
     },
     options: [{
       value: 'mysql',
@@ -114,13 +118,13 @@ export default {
     tableElement: undefined,
     htmlTxt: undefined
   }),
-  created () {
+  created() {
     // 数据库链接
     this.initListTable()
   },
   methods: {
     // 加载试图和表格
-    initListTable () {
+    initListTable() {
       try {
         const db = window.localStorage.getItem('dbConn')
         if (db) {
@@ -134,7 +138,7 @@ export default {
         this.dialogFormVisible = true
       }
     },
-    submitClick () {
+    submitClick() {
       window.localStorage.setItem('dbConn', JSON.stringify(this.dbConn))
       this.sqlHelper = new SqlHelper(this.dbConn)
       this.sqlHelper.query(this.sqlHelper.findTablesSql(), (rows) => {
@@ -144,10 +148,10 @@ export default {
         console.log(errFunc)
       })
     },
-    settingClick () {
+    settingClick() {
       this.dialogFormVisible = !this.dialogFormVisible
     },
-    menuColumn (elitem) {
+    menuColumn(elitem) {
       this.tableElement = elitem
       this.sqlHelper.query(this.sqlHelper.findColumnSql(elitem.TABLE_NAME), (rows) => {
         this.columnData = rows
@@ -155,7 +159,7 @@ export default {
         console.log(errFunc)
       })
     },
-    eggModelClick () {
+    eggModelClick() {
       if (!this.tableElement) {
         return this.$message.error('请先点选表格！')
       }
@@ -170,7 +174,7 @@ export default {
         console.log(err)
       })
     },
-    deleteClick () {
+    deleteClick() {
       window.localStorage.removeItem('dbConn')
     }
   }
