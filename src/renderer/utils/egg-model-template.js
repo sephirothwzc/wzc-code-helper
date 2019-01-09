@@ -29,6 +29,8 @@ class EggModelTemplate {
         return 'BIGINT';
       case 'double':
         return 'DOUBLE';
+      case 'json':
+        return 'app.Sequelize.JSON';
     }
   }
   /**
