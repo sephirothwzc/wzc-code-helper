@@ -118,7 +118,7 @@ module.exports = app => {
     }
   );
 
-  ${inflect.camelize(this.elitem.TABLE_NAME)}Do.attributes = ${attr};
+  ${inflect.camelize(this.elitem.TABLE_NAME)}Do.attributesDef = ${attr};
 
   return ${inflect.camelize(this.elitem.TABLE_NAME)}Do;
 };
