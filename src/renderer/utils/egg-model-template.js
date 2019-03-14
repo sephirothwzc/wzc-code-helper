@@ -89,8 +89,9 @@ class EggModelTemplate {
     // return '123' + col + attr
 
     return `'use strict';
-const snowflake = require('snowflake-nodejs');
-snowflake.init();
+const FlakeId = require('flake-idgen');
+const intformat = require('biguint-format');
+const flakeIdGen = new FlakeId({ epoch: 1300000000000 });
 
 module.exports = app => {
   const { ${typeGroup.toString()} } = app.Sequelize;
@@ -101,7 +102,7 @@ module.exports = app => {
       id: {
         type: BIGINT,
         primaryKey: true,
-        defaultValue: () => snowflake.nextId(1, 2),
+        defaultValue: () => intformat(flakeIdGen.next(), 'dec'),
       },
       ${col}
     },
