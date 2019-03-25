@@ -25,6 +25,10 @@
           egg-model
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
+        <el-button type="primary" circle @click="eggContractClick">
+          egg-contract
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
         <el-button type="danger" icon="el-icon-setting" circle @click="settingClick"></el-button>
         <span>{{dbConn.dbType}}</span>
         <el-button type="danger" icon="el-icon-delete" circle @click="deleteClick"></el-button>
@@ -41,7 +45,7 @@
       </el-main>
     </el-container>
     <!-- 弹出数据选择 -->
-    <el-dialog title="数据库设置" :visible.sync="dialogFormVisible">
+    <el-dialog width="90%" custom-class="dialog" title="数据库设置" :visible.sync="dialogFormVisible">
       <el-form :model="dbConn">
         <el-form-item label="数据库" :label-width="formLabelWidth">
           <el-select v-model="dbConn.dbType" placeholder="请选择数据库类型">
@@ -88,7 +92,8 @@
 
 <script>
 import SqlHelper from '@/utils/sql-helper.js'
-import EggModelTemplate from '@/utils/egg-model-template.js'
+import EggModelTemplate from '@/utils/egg-model-template5.js'
+import EggSwaggerDocContract from '@/utils/egg-swagger-doc-contract.js';
 
 export default {
   data: () => ({
@@ -174,6 +179,21 @@ export default {
         console.log(err)
       })
     },
+    eggContractClick () {
+      if (!this.tableElement) {
+        return this.$message.error('请先点选表格！')
+      }
+      this.htmlTxt = new EggSwaggerDocContract(this.tableElement, this.columnData, this.dbConn).findModelTxt()
+      this.$prompt('model内容', '提示', {
+        confirmButtonText: '确定',
+        inputType: 'textarea',
+        inputValue: this.htmlTxt
+      }).then((result) => {
+        console.log(result)
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
     deleteClick () {
       window.localStorage.removeItem('dbConn')
     }
@@ -190,5 +210,10 @@ export default {
 
 .el-aside {
   color: #333;
+}
+
+.dialog {
+  width: 600px;
+  height: 800px;
 }
 </style>

@@ -76,16 +76,13 @@ class EggModelTemplate {
         !typeGroup.includes(typetest) && typeGroup.push(typetest);
         // #region
         col += `// ${element.COLUMN_COMMENT}
-        ${inflect.camelize(
-    element.COLUMN_NAME,
-    false
-  )}: { type: ${this.findTypeTxt(element)}, field: '${
-  element.COLUMN_NAME
-}' },
+        ${inflect.camelize(element.COLUMN_NAME, false)}: ${this.findTypeTxt(
+  element
+)},
         `;
         // #endregion
       });
-    const attr = this.privateFindModelAttributes();
+    // const attr = this.privateFindModelAttributes();
     // return '123' + col + attr
 
     return `'use strict';
@@ -117,9 +114,6 @@ module.exports = app => {
       ${this.conn.deletedAt ? '' : '//'} deletedAt: '${this.conn.deletedAt}',
     }
   );
-
-  ${inflect.camelize(this.elitem.TABLE_NAME)}Do.attributesDef = ${attr};
-  ${inflect.camelize(this.elitem.TABLE_NAME)}Do.attributesDef = ${attr};
 
   return ${inflect.camelize(this.elitem.TABLE_NAME)}Do;
 };
