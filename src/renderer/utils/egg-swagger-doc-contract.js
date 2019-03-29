@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-03-25 18:01:51
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-03-25 18:45:36
+ * @Last Modified time: 2019-03-29 16:47:15
  */
 'use strict';
 const inflect = require('i')();
@@ -76,7 +76,8 @@ class EggContractTemplate {
         // #region
         col += `// ${element.COLUMN_COMMENT}
         ${inflect.camelize(element.COLUMN_NAME, false)}:{ 
-          type: '${this.findTypeTxt(element)}', 
+          type: '${this.findTypeTxt(element)}',
+          description: '${element.COLUMN_COMMENT}', 
           // required: true, 
           // example: '1' ,${this.findEnum(element.COLUMN_COMMENT)}
         },
