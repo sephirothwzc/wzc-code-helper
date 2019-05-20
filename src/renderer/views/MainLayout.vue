@@ -21,6 +21,10 @@
     </el-aside>
     <el-container>
       <el-header style="text-align: right; font-size: 12px">
+        <el-button type="primary" circle @click="clickTypeorm">
+          typeorm-entity
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
         <el-button type="primary" circle @click="eggModelClick">
           egg-model
           <i class="el-icon-upload el-icon--download"></i>
@@ -93,6 +97,7 @@
 <script>
 import SqlHelper from '@/utils/sql-helper.js'
 import EggModelTemplate from '@/utils/egg-model-template5.js'
+import TypeormEntityTemplate from '@/utils/typeorm-entity-template.js';
 import EggSwaggerDocContract from '@/utils/egg-swagger-doc-contract.js';
 
 export default {
@@ -162,6 +167,21 @@ export default {
         this.columnData = rows
       }, (errFunc) => {
         console.log(errFunc)
+      })
+    },
+    clickTypeorm () {
+      if (!this.tableElement) {
+        return this.$message.error('请先点选表格！')
+      }
+      this.htmlTxt = new TypeormEntityTemplate(this.tableElement, this.columnData, this.dbConn).findModelTxt()
+      this.$prompt('typeorm-entity 内容', '提示', {
+        confirmButtonText: '确定',
+        inputType: 'textarea',
+        inputValue: this.htmlTxt
+      }).then((result) => {
+        console.log(result)
+      }).catch((err) => {
+        console.log(err)
       })
     },
     eggModelClick () {
