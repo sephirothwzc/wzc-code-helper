@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-20 22:47:00
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-05-20 23:25:54
+ * @Last Modified time: 2019-05-21 09:50:11
  */
 const inflect = require('i')();
 const _ = require('lodash');
@@ -18,22 +18,22 @@ class EggModelTemplate {
     switch (element.DATA_TYPE) {
       case 'nvarchar':
       case 'varchar':
-        return 'string';
+        return 'String';
       case 'datetime':
-        return `datetime`;
+        return `Date`;
       case 'timestamp':
       case 'int':
-        return `number`;
+        return `Number`;
       case 'decimal':
-        return `number`;
+        return `Number`;
       case 'boolean':
-        return 'boolean';
+        return 'Boolean';
       case 'bigint':
-        return 'string';
+        return 'String';
       case 'double':
-        return 'number';
+        return 'Number';
       case 'json':
-        return 'object';
+        return 'json';
     }
   }
   /**
