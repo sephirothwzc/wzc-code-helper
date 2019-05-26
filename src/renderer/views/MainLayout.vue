@@ -25,6 +25,10 @@
           typeorm-entity
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
+        <el-button type="primary" circle @click="clickSequelizeTypeScriptModel">
+          st-model
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
         <el-button type="primary" circle @click="eggModelClick">
           egg-model
           <i class="el-icon-upload el-icon--download"></i>
@@ -99,6 +103,7 @@ import SqlHelper from '@/utils/sql-helper.js'
 import EggModelTemplate from '@/utils/egg-model-template5.js'
 import TypeormEntityTemplate from '@/utils/typeorm-entity-template.js';
 import EggSwaggerDocContract from '@/utils/egg-swagger-doc-contract.js';
+import SequelizeTypeScriptModel from '@/utils/sequelize-typescript-model.js'
 
 export default {
   data: () => ({
@@ -167,6 +172,21 @@ export default {
         this.columnData = rows
       }, (errFunc) => {
         console.log(errFunc)
+      })
+    },
+    clickSequelizeTypeScriptModel () {
+      if (!this.tableElement) {
+        return this.$message.error('请先点选表格！')
+      }
+      this.htmlTxt = new SequelizeTypeScriptModel(this.tableElement, this.columnData, this.dbConn).findModelTxt()
+      this.$prompt('typeorm-entity 内容', '提示', {
+        confirmButtonText: '确定',
+        inputType: 'textarea',
+        inputValue: this.htmlTxt
+      }).then((result) => {
+        console.log(result)
+      }).catch((err) => {
+        console.log(err)
       })
     },
     clickTypeorm () {
