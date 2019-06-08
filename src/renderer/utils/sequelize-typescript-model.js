@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-05-26 10:28:03
+ * @Last Modified time: 2019-06-08 14:13:49
  */
 const inflect = require('i')();
 const _ = require('lodash');
@@ -105,6 +105,17 @@ class SequelizeTypeScriptModel {
     enum: [${ee}]`;
   }
 
+  findConst () {
+    const cc = this.columns.map(p => {
+      return `  
+      /**
+       * ${inflect.camelize(p.COLUMN_NAME, false)}
+       */
+      ${p.COLUMN_NAME.toUpperCase()}: '${inflect.camelize(p.COLUMN_NAME, false)}'`;
+    })
+    return cc.join(',');
+  }
+
   findModelTxt () {
     let col = '';
     this.columns
@@ -152,6 +163,11 @@ export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect
 export class ${inflect.camelize(this.elitem.TABLE_NAME)}Model extends BaseModel {
   ${col}
 }
+
+// 常量生成
+export const Const${inflect.camelize(this.elitem.TABLE_NAME)} = {
+${this.findConst()}
+};
 `;
   }
 }

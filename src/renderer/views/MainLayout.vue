@@ -53,7 +53,7 @@
       </el-main>
     </el-container>
     <!-- 弹出数据选择 -->
-    <el-dialog width="90%" custom-class="dialog" title="数据库设置" :visible.sync="dialogFormVisible">
+    <el-dialog width="90vw" custom-class="dialog" title="数据库设置" :visible.sync="dialogFormVisible">
       <el-form :model="dbConn">
         <el-form-item label="数据库" :label-width="formLabelWidth">
           <el-select v-model="dbConn.dbType" placeholder="请选择数据库类型">
@@ -95,6 +95,13 @@
         <el-button type="primary" @click="submitClick">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 代码生成 -->
+    <el-dialog width="90vw" custom-class="dialog" title="代码生成" :visible.sync="dialogCodeVisible">
+      <el-input type="textarea" :rows="10" v-model="htmlTxt" autocomplete="off"></el-input>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogCodeVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -109,6 +116,7 @@ export default {
   data: () => ({
     formLabelWidth: '120px',
     dialogFormVisible: false,
+    dialogCodeVisible: false,
     dbConn: {
       dbType: undefined,
       host: undefined,
@@ -179,15 +187,16 @@ export default {
         return this.$message.error('请先点选表格！')
       }
       this.htmlTxt = new SequelizeTypeScriptModel(this.tableElement, this.columnData, this.dbConn).findModelTxt()
-      this.$prompt('typeorm-entity 内容', '提示', {
-        confirmButtonText: '确定',
-        inputType: 'textarea',
-        inputValue: this.htmlTxt
-      }).then((result) => {
-        console.log(result)
-      }).catch((err) => {
-        console.log(err)
-      })
+      this.dialogCodeVisible = true
+      // this.$prompt('typeorm-entity 内容', '提示', {
+      //   confirmButtonText: '确定',
+      //   inputType: 'textarea',
+      //   inputValue: this.htmlTxt
+      // }).then((result) => {
+      //   console.log(result)
+      // }).catch((err) => {
+      //   console.log(err)
+      // })
     },
     clickTypeorm () {
       if (!this.tableElement) {
@@ -253,7 +262,7 @@ export default {
 }
 
 .dialog {
-  width: 600px;
-  height: 800px;
+  width: 80vw;
+  height: 80vh;
 }
 </style>
