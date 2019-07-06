@@ -12,7 +12,7 @@ class SqlHelper {
       case 'mysql': {
         return `select table_name AS TABLE_NAME,table_comment AS TABLE_COMMENT from information_schema.tables where table_schema='${
           this.connString.database
-        }'`
+        }' order by table_name`
       }
       case 'mssql': {
         return "SELECT DISTINCT d.name as TABLE_NAME,f.value as TABLE_COMMENT FROM syscolumns a LEFT JOIN systypes b ON a.xusertype= b.xusertype INNER JOIN sysobjects d ON a.id= d.id AND d.xtype= 'U' AND d.name<> 'dtproperties' LEFT JOIN syscomments e ON a.cdefault= e.id LEFT JOIN sys.extended_properties g ON a.id= G.major_id AND a.colid= g.minor_id LEFT JOIN sys.extended_properties f ON d.id= f.major_id AND f.minor_id= 0 order by d.name"
@@ -25,7 +25,7 @@ class SqlHelper {
       case 'mysql': {
         return `SELECT * FROM information_schema.columns WHERE table_schema='${
           this.connString.database
-        }' AND table_name='${tableName}'`
+        }' AND table_name='${tableName}' order by COLUMN_NAME`
       }
       case 'mssql': {
         return `SELECT 
@@ -70,7 +70,7 @@ and d.table_name='${tableName}'`
       }
       resultFunc(rows)
     })
-    connection.end(() => {})
+    connection.end(() => { })
   }
 
   async mssqlquery (sql, resultFunc, errFunc) {

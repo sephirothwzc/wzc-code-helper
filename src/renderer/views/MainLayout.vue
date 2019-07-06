@@ -29,6 +29,10 @@
           st-model
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
+        <el-button type="primary" circle @click="clickInterface">
+          st-interface
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
         <el-button type="primary" circle @click="eggModelClick">
           egg-model
           <i class="el-icon-upload el-icon--download"></i>
@@ -181,6 +185,13 @@ export default {
       }, (errFunc) => {
         console.log(errFunc)
       })
+    },
+    clickInterface () {
+      if (!this.tableElement) {
+        return this.$message.error('请先点选表格！')
+      }
+      this.htmlTxt = new SequelizeTypeScriptModel(this.tableElement, this.columnData, this.dbConn).findInterface()
+      this.dialogCodeVisible = true
     },
     clickSequelizeTypeScriptModel () {
       if (!this.tableElement) {

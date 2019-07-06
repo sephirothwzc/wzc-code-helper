@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-06-08 14:13:49
+ * @Last Modified time: 2019-07-06 22:18:42
  */
 const inflect = require('i')();
 const _ = require('lodash');
@@ -168,6 +168,37 @@ export class ${inflect.camelize(this.elitem.TABLE_NAME)}Model extends BaseModel 
 export const Const${inflect.camelize(this.elitem.TABLE_NAME)} = {
 ${this.findConst()}
 };
+`;
+  }
+
+  findInterface () {
+    let col = '';
+    this.columns
+      .filter(
+        x =>
+          x.COLUMN_NAME !== 'id' &&
+          x.COLUMN_NAME !== 'created_at' &&
+          x.COLUMN_NAME !== 'updated_at' &&
+          x.COLUMN_NAME !== 'deleted_at'
+      )
+      .forEach(element => {
+        const typeString = this.findTypeTxt(element);
+        // #region
+        col += `
+  /**
+   *  ${element.COLUMN_COMMENT}
+   */ 
+  ${inflect.camelize(element.COLUMN_NAME, false)}: ${typeString};
+        `;
+        // #endregion
+      });
+    // const attr = this.privateFindModelAttributes();
+    // return '123' + col + attr
+
+    return `
+export interface I${inflect.camelize(this.elitem.TABLE_NAME)}{
+  ${col}
+}
 `;
   }
 }
