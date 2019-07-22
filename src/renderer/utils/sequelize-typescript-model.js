@@ -2,10 +2,9 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-07-06 22:18:42
+ * @Last Modified time: 2019-07-22 17:18:34
  */
 const inflect = require('i')();
-const _ = require('lodash');
 
 class SequelizeTypeScriptModel {
   constructor (elitem, columns, conn) {
@@ -36,38 +35,6 @@ class SequelizeTypeScriptModel {
         return 'json';
     }
   }
-  /**
-   * 设置attributes
-   *
-   * @returns
-   * @memberof EggModelTemplate
-   */
-  privateFindModelAttributes () {
-    let attr = '[';
-    _(this.columns)
-      .filter(
-        x =>
-          x.COLUMN_NAME !== 'created_at' &&
-          x.COLUMN_NAME !== 'updated_at' &&
-          x.COLUMN_NAME !== 'deleted_at'
-      )
-      .map(p => {
-        const colName = p.COLUMN_NAME;
-        const proName = inflect.camelize(p.COLUMN_NAME, false);
-        if (colName.length === proName.length) {
-          return ` '${proName}'`;
-        } else {
-          return ` [ '${colName}', '${proName}' ]`;
-        }
-      })
-      .value()
-      .forEach(p => {
-        attr += p;
-        attr += ',';
-      });
-    attr += ']';
-    return attr;
-  }
 
   findLength (element) {
     switch (element.DATA_TYPE) {
@@ -87,22 +54,57 @@ class SequelizeTypeScriptModel {
     }
   }
 
-  findEnum (COLUMN_COMMENT, typeString) {
-    if (!COLUMN_COMMENT) {
+  findEnum (element) {
+    if (!element.COLUMN_COMMENT) {
       return '';
     }
     const regex2 = /\[(.+?)\]/g; // [] 中括号
-    const value = COLUMN_COMMENT.match(regex2);
+    const value = element.COLUMN_COMMENT.match(regex2);
     if (!value) {
       return '';
     }
     const ee = value[value.length - 1]
+      .replace('[', '')
+      .replace(']', '')
       .split(',')
-      .map(p => typeString === 'string' ? `'${p}'` : p)
+      .map(p => {
+        const rd3 = p.split(' ');
+        const val = rd3[1] ? `:${rd3[1]}` : '';
+        return `
+  /**
+   * ${rd3[2]}
+   */
+  ${rd3[0]}${val}
+          `;
+      })
       .join(',')
       .toString();
-    return `
-    enum: [${ee}]`;
+    return `export enum E${inflect.camelize(element.COLUMN_NAME, true)} {
+${ee}
+    }`;
+  }
+
+  findAttrType (element) {
+    switch (element.DATA_TYPE) {
+      case 'nvarchar':
+      case 'varchar':
+        return 'STRING';
+      case 'datetime':
+        return `DATE`;
+      case 'timestamp':
+      case 'int':
+        return `INTEGER`;
+      case 'decimal':
+        return `DECIMAL`;
+      case 'boolean':
+        return 'BOOLEAN';
+      case 'bigint':
+        return 'BIGINT';
+      case 'double':
+        return 'DOUBLE';
+      case 'json':
+        return 'SequlizeJSON';
+    }
   }
 
   findConst () {
@@ -118,6 +120,8 @@ class SequelizeTypeScriptModel {
 
   findModelTxt () {
     let col = '';
+    let tenum = '';
+    const typeGroup = [];
     this.columns
       .filter(
         x =>
@@ -128,25 +132,37 @@ class SequelizeTypeScriptModel {
       )
       .forEach(element => {
         const typeString = this.findTypeTxt(element);
-        // #region
+        const colEnum = this.findEnum(element);
+        const mastType = !colEnum ? typeString : `E${inflect.camelize(element.COLUMN_NAME, true)}`;
+        const colType = mastType !== typeString && this.findAttrType(element);
+        colType && !typeGroup.includes(colType) && typeGroup.push(colType);
+        const colTypestr = colType && ` ,type: ${colType}`;
+        // #region col
         col += `
   /**
    *  ${element.COLUMN_COMMENT}
    */ 
-  @Column({ comment: '${element.COLUMN_COMMENT}' })
-  ${inflect.camelize(element.COLUMN_NAME, false)}: ${typeString};
+  @Column({ comment: '${element.COLUMN_COMMENT}' ${colTypestr || ''} })
+  ${inflect.camelize(element.COLUMN_NAME, false)}: ${mastType};
         `;
         // #endregion
+        // #region enum
+        tenum += `${colEnum}`;
+        // #endregion
       });
-    // const attr = this.privateFindModelAttributes();
-    // return '123' + col + attr
+    const iType = typeGroup.length > 0 && `import {${typeGroup.join(',').toString()}} from 'sequelize';`;
 
     return `import { providerWrapper } from 'midway';
 import { Table, Column } from 'sequelize-typescript';
 import { BaseModel } from '../../base/base.model';
+${iType || ''}
 
-// @provide 用 工厂模式static model
-export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
+// #region enum
+${tenum}
+  // #endregion
+
+  // @provide 用 工厂模式static model
+  export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)} Model;
 providerWrapper([
   {
     id: '${inflect.camelize(this.elitem.TABLE_NAME)}Model',
@@ -154,19 +170,19 @@ providerWrapper([
   }
 ]);
 // 依赖注入用导出类型
-export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
+export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect.camelize(this.elitem.TABLE_NAME)} Model;
 
 
 @Table({
   tableName: '${this.elitem.TABLE_NAME}'
 })
-export class ${inflect.camelize(this.elitem.TABLE_NAME)}Model extends BaseModel {
+export class ${inflect.camelize(this.elitem.TABLE_NAME)} Model extends BaseModel {
   ${col}
 }
 
 // 常量生成
 export const Const${inflect.camelize(this.elitem.TABLE_NAME)} = {
-${this.findConst()}
+  ${this.findConst()}
 };
 `;
   }
@@ -185,15 +201,13 @@ ${this.findConst()}
         const typeString = this.findTypeTxt(element);
         // #region
         col += `
-  /**
-   *  ${element.COLUMN_COMMENT}
-   */ 
-  ${inflect.camelize(element.COLUMN_NAME, false)}: ${typeString};
-        `;
+/**
+ *  ${element.COLUMN_COMMENT}
+ */
+${inflect.camelize(element.COLUMN_NAME, false)}: ${typeString};
+`;
         // #endregion
       });
-    // const attr = this.privateFindModelAttributes();
-    // return '123' + col + attr
 
     return `
 export interface I${inflect.camelize(this.elitem.TABLE_NAME)}{

@@ -21,10 +21,10 @@
     </el-aside>
     <el-container>
       <el-header style="text-align: right; font-size: 12px">
-        <el-button type="primary" circle @click="clickTypeorm">
+        <!-- <el-button type="primary" circle @click="clickTypeorm">
           typeorm-entity
           <i class="el-icon-upload el-icon--download"></i>
-        </el-button>
+        </el-button>-->
         <el-button type="primary" circle @click="clickSequelizeTypeScriptModel">
           st-model
           <i class="el-icon-upload el-icon--download"></i>
@@ -33,27 +33,40 @@
           st-interface
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
-        <el-button type="primary" circle @click="eggModelClick">
+        <el-button type="primary" circle @click="clickSchemas">
+          st-schemas
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
+        <!-- <el-button type="primary" circle @click="eggModelClick">
           egg-model
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
         <el-button type="primary" circle @click="eggContractClick">
           egg-contract
           <i class="el-icon-upload el-icon--download"></i>
-        </el-button>
+        </el-button>-->
         <el-button type="danger" icon="el-icon-setting" circle @click="settingClick"></el-button>
         <span>{{dbConn.dbType}}</span>
         <el-button type="danger" icon="el-icon-delete" circle @click="deleteClick"></el-button>
       </el-header>
 
       <el-main>
-        <el-table :data="columnData">
-          <el-table-column prop="COLUMN_NAME" label="字段名"></el-table-column>
-          <el-table-column prop="COLUMN_COMMENT" label="说明"></el-table-column>
-          <el-table-column prop="IS_NULLABLE" label="必填"></el-table-column>
-          <el-table-column prop="DATA_TYPE" label="数据类型"></el-table-column>
-          <el-table-column prop="CHARACTER_MAXIMUM_LENGTH" label="长度"></el-table-column>
-        </el-table>
+        <table border="1" style="width:100%;font-size:20px;">
+          <tr>
+            <th>字段名</th>
+            <th>说明</th>
+            <th>必填</th>
+            <th>数据类型</th>
+            <th>长度</th>
+          </tr>
+          <tr v-for="item in columnData" :key="item.id">
+            <td>{{item.COLUMN_NAME}}</td>
+            <td>{{item.COLUMN_COMMENT}}</td>
+            <td>{{item.IS_NULLABLE}}</td>
+            <td>{{item.DATA_TYPE}}</td>
+            <td>{{item.CHARACTER_MAXIMUM_LENGTH}}</td>
+          </tr>
+        </table>
       </el-main>
     </el-container>
     <!-- 弹出数据选择 -->
@@ -114,7 +127,8 @@ import SqlHelper from '@/utils/sql-helper.js'
 import EggModelTemplate from '@/utils/egg-model-template5.js'
 import TypeormEntityTemplate from '@/utils/typeorm-entity-template.js';
 import EggSwaggerDocContract from '@/utils/egg-swagger-doc-contract.js';
-import SequelizeTypeScriptModel from '@/utils/sequelize-typescript-model.js'
+import SequelizeTypeScriptModel from '@/utils/sequelize-typescript-model.js';
+import JoiSchema from '@/utils/joi.js';
 
 export default {
   data: () => ({
@@ -185,6 +199,13 @@ export default {
       }, (errFunc) => {
         console.log(errFunc)
       })
+    },
+    clickSchemas () {
+      if (!this.tableElement) {
+        return this.$message.error('请先点选表格！')
+      }
+      this.htmlTxt = new JoiSchema(this.tableElement, this.columnData, this.dbConn).findSchema()
+      this.dialogCodeVisible = true
     },
     clickInterface () {
       if (!this.tableElement) {

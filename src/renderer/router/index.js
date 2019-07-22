@@ -13,6 +13,11 @@ export default new Router({
     {
       path: '*',
       redirect: '/'
+    },
+    {
+      path: '/interface-to-schemas',
+      name: 'interface-to-schemas',
+      component: require('@/views/interface-to-schemas').default
     }
   ]
 })
