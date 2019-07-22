@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-07-22 17:18:34
+ * @Last Modified time: 2019-07-22 20:29:11
  */
 const inflect = require('i')();
 
@@ -162,7 +162,7 @@ ${tenum}
   // #endregion
 
   // @provide 用 工厂模式static model
-  export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)} Model;
+  export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
 providerWrapper([
   {
     id: '${inflect.camelize(this.elitem.TABLE_NAME)}Model',
@@ -170,13 +170,13 @@ providerWrapper([
   }
 ]);
 // 依赖注入用导出类型
-export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect.camelize(this.elitem.TABLE_NAME)} Model;
+export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
 
 
 @Table({
   tableName: '${this.elitem.TABLE_NAME}'
 })
-export class ${inflect.camelize(this.elitem.TABLE_NAME)} Model extends BaseModel {
+export class ${inflect.camelize(this.elitem.TABLE_NAME)}Model extends BaseModel {
   ${col}
 }
 
