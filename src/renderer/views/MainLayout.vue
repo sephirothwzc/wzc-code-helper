@@ -33,8 +33,12 @@
           st-interface
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
-        <el-button type="primary" circle @click="clickSchemas">
+        <el-button type="primary" circle @click="clickSchemas(false)">
           st-schemas
+          <i class="el-icon-upload el-icon--download"></i>
+        </el-button>
+        <el-button type="primary" circle @click="clickSchemas(true)">
+          st-schemas-out
           <i class="el-icon-upload el-icon--download"></i>
         </el-button>
         <!-- <el-button type="primary" circle @click="eggModelClick">
@@ -200,11 +204,11 @@ export default {
         console.log(errFunc)
       })
     },
-    clickSchemas () {
+    clickSchemas (outis) {
       if (!this.tableElement) {
         return this.$message.error('请先点选表格！')
       }
-      this.htmlTxt = new JoiSchema(this.tableElement, this.columnData, this.dbConn).findSchema()
+      this.htmlTxt = new JoiSchema(this.tableElement, this.columnData, this.dbConn).findSchema(outis)
       this.dialogCodeVisible = true
     },
     clickInterface () {

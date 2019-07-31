@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-07-22 17:01:23
+ * @Last Modified time: 2019-07-31 12:00:11
  */
 const inflect = require('i')();
 
@@ -76,7 +76,8 @@ class JoiSchema {
     return `.valid(${ee})`;
   }
 
-  findSchema () {
+  findSchema (outis) {
+    const nullStr = outis ? `.allow(null).allow('')` : '';
     let col = '';
     this.columns
       .filter(
@@ -91,7 +92,7 @@ class JoiSchema {
         const lengthStr = this[findLength](element);
         const enumString = this[findEnum](element);
         // #region
-        col += `  ${inflect.camelize(element.COLUMN_NAME, false)}: joi.${typeString}.required()${lengthStr}${enumString}.description('${element.COLUMN_COMMENT}'),
+        col += `  ${inflect.camelize(element.COLUMN_NAME, false)}: joi.${typeString}${nullStr}.required()${lengthStr}${enumString}.description('${element.COLUMN_COMMENT}'),
 `;
         // #endregion
       });
