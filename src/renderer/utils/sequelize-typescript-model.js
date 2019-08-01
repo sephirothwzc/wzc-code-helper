@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-07-22 20:29:11
+ * @Last Modified time: 2019-08-01 18:08:25
  */
 const inflect = require('i')();
 
@@ -69,7 +69,7 @@ class SequelizeTypeScriptModel {
       .split(',')
       .map(p => {
         const rd3 = p.split(' ');
-        const val = rd3[1] ? `:${rd3[1]}` : '';
+        const val = rd3[1] ? `= ${rd3[1]}` : '';
         return `
   /**
    * ${rd3[2]}
@@ -113,9 +113,9 @@ ${ee}
       /**
        * ${inflect.camelize(p.COLUMN_NAME, false)}
        */
-      ${p.COLUMN_NAME.toUpperCase()}: '${inflect.camelize(p.COLUMN_NAME, false)}'`;
+      static readonly ${p.COLUMN_NAME.toUpperCase()}:string = '${inflect.camelize(p.COLUMN_NAME, false)}';`;
     })
-    return cc.join(',');
+    return cc.join('');
   }
 
   findModelTxt () {
@@ -140,7 +140,7 @@ ${ee}
         // #region col
         col += `
   /**
-   *  ${element.COLUMN_COMMENT}
+   * ${element.COLUMN_COMMENT}
    */ 
   @Column({ comment: '${element.COLUMN_COMMENT}' ${colTypestr || ''} })
   ${inflect.camelize(element.COLUMN_NAME, false)}: ${mastType};
@@ -156,10 +156,9 @@ ${ee}
 import { Table, Column } from 'sequelize-typescript';
 import { BaseModel } from '../../base/base.model';
 ${iType || ''}
-
 // #region enum
 ${tenum}
-  // #endregion
+// #endregion
 
   // @provide 用 工厂模式static model
   export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
@@ -172,7 +171,6 @@ providerWrapper([
 // 依赖注入用导出类型
 export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
 
-
 @Table({
   tableName: '${this.elitem.TABLE_NAME}'
 })
@@ -181,9 +179,9 @@ export class ${inflect.camelize(this.elitem.TABLE_NAME)}Model extends BaseModel 
 }
 
 // 常量生成
-export const Const${inflect.camelize(this.elitem.TABLE_NAME)} = {
+export class Const${inflect.camelize(this.elitem.TABLE_NAME)} {
   ${this.findConst()}
-};
+}
 `;
   }
 
@@ -202,7 +200,7 @@ export const Const${inflect.camelize(this.elitem.TABLE_NAME)} = {
         // #region
         col += `
 /**
- *  ${element.COLUMN_COMMENT}
+ * ${element.COLUMN_COMMENT}
  */
 ${inflect.camelize(element.COLUMN_NAME, false)}: ${typeString};
 `;
