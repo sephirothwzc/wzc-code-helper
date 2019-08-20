@@ -2,7 +2,7 @@
  * @Author: 吴占超
  * @Date: 2019-05-26 10:04:42
  * @Last Modified by: 吴占超
- * @Last Modified time: 2019-08-01 18:08:25
+ * @Last Modified time: 2019-08-20 13:47:12
  */
 const inflect = require('i')();
 
@@ -140,8 +140,8 @@ ${ee}
         // #region col
         col += `
   /**
-   * ${element.COLUMN_COMMENT}
-   */ 
+   * ${element.COLUMN_COMMENT ? element.COLUMN_COMMENT : element.COLUMN_NAME}
+   */
   @Column({ comment: '${element.COLUMN_COMMENT}' ${colTypestr || ''} })
   ${inflect.camelize(element.COLUMN_NAME, false)}: ${mastType};
         `;
@@ -156,18 +156,9 @@ ${ee}
 import { Table, Column } from 'sequelize-typescript';
 import { BaseModel } from '../../base/base.model';
 ${iType || ''}
-// #region enum
-${tenum}
+// #region enum${tenum ? `\r\n` + tenum : ''}
 // #endregion
 
-  // @provide 用 工厂模式static model
-  export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
-providerWrapper([
-  {
-    id: '${inflect.camelize(this.elitem.TABLE_NAME)}Model',
-    provider: factory
-  }
-]);
 // 依赖注入用导出类型
 export type I${inflect.camelize(this.elitem.TABLE_NAME)}Model = typeof ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
 
@@ -182,6 +173,15 @@ export class ${inflect.camelize(this.elitem.TABLE_NAME)}Model extends BaseModel 
 export class Const${inflect.camelize(this.elitem.TABLE_NAME)} {
   ${this.findConst()}
 }
+
+  // @provide 用 工厂模式static model
+  export const factory = () => ${inflect.camelize(this.elitem.TABLE_NAME)}Model;
+providerWrapper([
+  {
+    id: '${inflect.camelize(this.elitem.TABLE_NAME)}Model',
+    provider: factory
+  }
+]);
 `;
   }
 
